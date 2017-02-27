@@ -25,6 +25,7 @@ messageFormatPattern
 messageFormatElement
     = messageTextElement
     / argumentElement
+    / nestedElement
 
 messageText
     = text:(_ chars _)+ {
@@ -53,7 +54,7 @@ messageTextElement
 
 argument
     = number
-    / $([^ \t\n\r,.+={}#]+)
+    / $([^ \t\n\r,.+={}#<>:]+)
 
 argumentElement
     = '{' _ id:argument _ format:(',' _ elementFormat)? _ '}' {
@@ -62,6 +63,19 @@ argumentElement
             id    : id,
             format: format && format[2]
         };
+    }
+
+nestedElement
+    = '<x:' id:argument '>' _ pattern:messageFormatPattern _ '</x:' id_close:argument '>' {
+        if (id_close !== id) {
+            expected('</x:' + id_close + '> should match opening: <x:' + id + '>');
+        }
+
+        return {
+            type : 'nestedElement',
+            id   : id,
+            value: pattern
+        }
     }
 
 elementFormat
@@ -146,11 +160,13 @@ number = digits:('0' / $([1-9] digit*)) {
 }
 
 char
-    = [^{}\\\0-\x1F\x7f \t\n\r]
+    = [^<{}\\\0-\x1F\x7f \t\n\r]
+    / '<' !('/'? 'x:') { return '<'; }
     / '\\\\' { return '\\'; }
-    / '\\#'  { return '\\#'; }
+    / '\\<'  { return '\u003C'; }
     / '\\{'  { return '\u007B'; }
     / '\\}'  { return '\u007D'; }
+    / '\\#'  { return '\\#'; }
     / '\\u'  digits:$(hexDigit hexDigit hexDigit hexDigit) {
         return String.fromCharCode(parseInt(digits, 16));
     }

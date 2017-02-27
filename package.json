@@ -6,7 +6,8 @@
   "jsnext:main": "src/parser.js",
   "scripts": {
     "test": "istanbul cover -- _mocha test/unit/ --reporter spec",
-    "prepublish": "grunt"
+    "build": "grunt",
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
