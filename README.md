@@ -1,3 +1,5 @@
+# Code has been moved to the [FormatJS monorepo](https://github.com/formatjs/formatjs/tree/master/packages/intl-messageformat-parser).
+
 Intl MessageFormat Parser
 =========================
 
